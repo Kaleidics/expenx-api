@@ -6,10 +6,10 @@ const jwt = require("jsonwebtoken");
 const config = require("../config");
 const router = express.Router();
 
-const createAuthToken = function(user) {
+const createAuthToken = function(user, body) {
     return jwt.sign({ user }, config.JWT_SECRET, {
         subject: user.username,
-        expiresIn: config.JWT_EXPIRY,
+        expiresIn: body.persistSignIn ? config.JWT_EXPIRY_EXTEND : config.JWT_EXPIRY,
         algorithm: "HS256"
     });
 };
@@ -18,8 +18,9 @@ const localAuth = passport.authenticate("local", { session: false });
 
 router.use(bodyParser.json());
 
-router.post("/login", localAuth, (req, res) => {
-    const authToken = createAuthToken(req.user.serialize());
+router.post("/signin", localAuth, (req, res) => {
+    console.log(req.body.persistSignIn);
+    const authToken = createAuthToken(req.user.serialize(), req.body);
     res.json({ authtoken: authToken, userid: req.user._id });
 });
 
