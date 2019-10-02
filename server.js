@@ -6,6 +6,7 @@ const passport = require("passport");
 const bodyParser = require("body-parser");
 
 const { router: usersRouter } = require("./users");
+const { router: expensesRouter } = require('./expenses');
 const { router: authRouter, localStrategy, jwtStrategy } = require("./auth");
 
 mongoose.Promise = global.Promise;
@@ -23,6 +24,7 @@ passport.use(jwtStrategy);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/users/", usersRouter);
 app.use("/auth/", authRouter);
+app.use("/expenses/", expensesRouter);
 
 app.use("/", (req, res) => {
     return res.status(200).json({ message: "hello" });
