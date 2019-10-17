@@ -52,8 +52,8 @@ router.post("/signup", jsonParser, (req, res) => {
                 return Promise.reject({
                     code: 422,
                     reason: "ValidationError",
-                    message: "username already taken",
-                    location: "username"
+                    message: "Email already taken!",
+                    location: "email"
                 });
             }
             // If there is no existing user, hash the password
@@ -74,7 +74,7 @@ router.post("/signup", jsonParser, (req, res) => {
                 return res.status(err.code).json(err);
             }
             console.log(err);
-            res.status(500).json({ code: 500, message: "Internal server error" });
+            res.status(500).json({ code: 500, message: "Something went terribly wrong!" });
         });
 });
 
