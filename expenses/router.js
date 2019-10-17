@@ -20,13 +20,15 @@ router.get('/user/:id', (req,res) => {
 router.post('/', [jsonParser, jwtAuth], (req, res) => {
     User.findOne({ username: req.user.username })
         .then(user => {
-            const { expense, expenseType, amount, expiration } = req.body;
+            const { expense, expenseType, amount, notes, expiration, status } = req.body;
             Expense.create({
-                user: user,
+                user: user._id,
                 expense: expense,
                 expenseType: expenseType,
+                notes: notes,
                 amount: amount,
-                expiration: expiration
+                expiration: expiration,
+                status: status
             })
             .then(expense => {
                 return res.status(201).json(expense);

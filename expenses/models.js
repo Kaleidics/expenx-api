@@ -20,8 +20,15 @@ const ExpenseSchema = mongoose.Schema({
         type: mongoose.Decimal128,
         required: true
     },
+    notes: {
+        type: String
+    },
     expiration: {
         type: Date,
+        required: true
+    },
+    status: {
+        type: String,
         required: true
     }
 });
@@ -31,6 +38,7 @@ ExpenseSchema.methods.serialize = () => {
         user: this.user || '',
         createdAt: this.createdAt || '',
         expense: this.expense || '',
+        note: this.notes || '',
         typeExpense: this.typeExpense || '',
         amount: this.amount || '',
         expiration: this.expiration || ''
