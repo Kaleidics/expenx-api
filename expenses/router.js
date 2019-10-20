@@ -9,11 +9,33 @@ const router = express.Router();
 const jsonParser = bodyParser.json();
 const jwtAuth = passport.authenticate('jwt', { session: false });
 
+const mongoose = require("mongoose");
+
 //view all expenses for a single user
-router.get('/user/:id', (req,res) => {
+router.get('/user/:id', [jsonParser, jwtAuth], (req,res) => {
     return Expense.find({ user: req.params.id })
         .sort([["_id", -1]])
         .then(expenses => res.status(200).json(expenses))
+        .catch(err => res.status(500).json({ message: "Something went terribly wrong!" }));
+});
+
+//get the sum of all expenses for one user
+router.get("/user_sum/:id", [jsonParser, jwtAuth], (req, res) => {
+    return Expense.aggregate([
+        {
+            $match: { user: new mongoose.Types.ObjectId(req.params.id) },
+        },
+        {
+            $group: {
+                _id: null,
+                total: {
+                    $sum: "$amount"
+                }
+            }
+        }])
+        .then(sum => {
+            res.status(200).json(sum);
+        })
         .catch(err => res.status(500).json({ message: "Something went terribly wrong!" }));
 });
 
