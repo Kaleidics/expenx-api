@@ -39,6 +39,32 @@ router.get("/user_sum/:id", [jsonParser, jwtAuth], (req, res) => {
         .catch(err => res.status(500).json({ message: "Something went terribly wrong!" }));
 });
 
+router.get("/user_month/:id", [jsonParser, jwtAuth], (req, res) => {
+    return Expense.aggregate([
+        {
+            $match: { user: new mongoose.Types.ObjectId(req.params.id) }
+        },
+        {
+            $project: {
+                "amount": 1,
+                month: { $month: "$expiration" }
+            }
+        },
+        {
+            $group: {
+                _id: "$month",
+                total: {
+                    $sum: "$amount"
+                }
+            }
+        }
+    ])
+        .then(sum => {
+            res.status(200).json(sum);
+        })
+        .catch(err => res.status(500).json({ message: "Something went terribly wrong!" }));
+});
+
 //create a new expense
 router.post('/', [jsonParser, jwtAuth], (req, res) => {
     User.findOne({ username: req.user.username })
