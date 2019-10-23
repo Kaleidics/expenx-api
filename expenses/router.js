@@ -84,7 +84,7 @@ router.get("/user_current_week/:id", [jsonParser, jwtAuth], (req, res) => {
                     {
                         expiration: {
                             $gte: thisWeek,
-                            $lt: today,
+                            $lt: tomorrow,
                         },
                     },
                 ],
