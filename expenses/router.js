@@ -67,14 +67,18 @@ router.get("/user_month/:id", [jsonParser, jwtAuth], (req, res) => {
         .catch(err => res.status(500).json({ message: "Something went terribly wrong!" }));
 });
 
-//get the sum of all expenses for the current day
 let now = Date.now(),
+    date = new Date();
     oneDay = 1000 * 60 * 60 * 24,
     oneWeek = 1000 * 60 * 60 * 24 * 7,
     today = new Date(now - (now % oneDay)),
     tomorrow = new Date(today.valueOf() + oneDay),
-    thisWeek = new Date(today.valueOf() - oneWeek);
+    thisWeek = new Date(today.valueOf() - oneWeek),
+    firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1),
+    lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
+
+//get sum of all expenses for the current week
 router.get("/user_current_week/:id", [jsonParser, jwtAuth], (req, res) => {
     Expense.aggregate([
         {
@@ -105,6 +109,50 @@ router.get("/user_current_week/:id", [jsonParser, jwtAuth], (req, res) => {
         .catch(err => res.status(500).json({ message: "Something went terribly wrong!" }));
 });
 
+router.get("/user_current_month/:id", [jsonParser, jwtAuth], (req, res) => {
+    Expense.aggregate([
+        {
+            $match: {
+                $and: [
+                    { user: new mongoose.Types.ObjectId(req.params.id) },
+                    {
+                        expiration: {
+                            $gte: firstDayOfMonth,
+                            $lt: lastDayOfMonth,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $group: {
+                _id: "$month",
+                total: {
+                    $sum: "$amount",
+                },
+            },
+        },
+    ])
+        .then(sum => {
+            res.status(200).json(sum);
+        })
+        .catch(err => res.status(500).json({ message: "Something went terribly wrong!" }));
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //create a new expense
 router.post("/", [jsonParser, jwtAuth], (req, res) => {
     User.findOne({ username: req.user.username })
@@ -130,7 +178,6 @@ router.post("/", [jsonParser, jwtAuth], (req, res) => {
             return res.status(500).json({ message: "Something went terribly wrong!" });
         });
 });
-
 
 
 module.exports = { router };
