@@ -73,11 +73,23 @@ let now = Date.now(),
     oneWeek = 1000 * 60 * 60 * 24 * 7,
     today = new Date(now - (now % oneDay)),
     tomorrow = new Date(today.valueOf() + oneDay),
-    thisWeek = new Date(today.valueOf() - oneWeek),
-    firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1),
-    lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    thisWeekStart = new Date(date.setDate(date.getDate() - date.getDay())),
+    thisWeekEnd = new Date(date.setDate(date.getDate() - date.getDay() + 7)),
+    firstDayOfMonthRaw = new Date(date.getFullYear(), date.getMonth(), 1),
+    firstDayOfMonth = new Date(firstDayOfMonthRaw.setSeconds(firstDayOfMonthRaw.getSeconds() - 25199)),
+    lastDayOfMonthRaw = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    lastDayOfMonth = new Date(lastDayOfMonthRaw.setSeconds(lastDayOfMonthRaw.getSeconds() + 61200));
 
-
+    console.log("now", now);
+    console.log("date:", date);
+    console.log("oneday:", oneDay);
+    console.log("oneweek:", oneWeek);
+    console.log("today:", today);
+    console.log("tomorrow:", tomorrow);
+    console.log("thisweekstart:", thisWeekStart);
+    console.log("thisweekend:", thisWeekEnd);
+    console.log("first of month:", firstDayOfMonth);
+    console.log("last of month:", lastDayOfMonth);
 //get sum of all expenses for the current week
 router.get("/user_current_week/:id", [jsonParser, jwtAuth], (req, res) => {
     Expense.aggregate([
@@ -87,8 +99,8 @@ router.get("/user_current_week/:id", [jsonParser, jwtAuth], (req, res) => {
                     { user: new mongoose.Types.ObjectId(req.params.id) },
                     {
                         expiration: {
-                            $gte: thisWeek,
-                            $lt: tomorrow,
+                            $gte: thisWeekStart,
+                            $lt: thisWeekEnd,
                         },
                     },
                 ],
